@@ -73,7 +73,7 @@ numRows = 12
 
 
 # whichgraph = raw_input('a or b:  ')
-whichgraph = 'ab'
+whichgraph = 'b'
 
 
 if 'a' in whichgraph:
@@ -123,10 +123,11 @@ if 'b' in whichgraph:
     pmap, minV, maxV = Model1.imgDynamicRange(priorityMap)
     dims = pmap.shape
     print dims
+    pmap = Model1.scale(priorityMap)
     for i in xrange(dims[0]):
     	for j in xrange(dims[0]):
     		tmp = pmap[i,j]
-    		pmap[i,j]= np.exp(tmp)
+    		pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
     plt.imshow(pmap)
 
 

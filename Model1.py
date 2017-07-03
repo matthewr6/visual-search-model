@@ -358,6 +358,11 @@ def feedbackSignal(objprots, targetIndx, imgC2b): #F(o,P), Eq 4
 	#print 'Feedback after normalization: ', feedback, np.min(feedback), np.max(feedback)
 	return feedback
 
+def scale(arr):
+    arr *= 1.0/np.amax(arr)
+    arr += 0.5
+    return arr
+
 def imgDynamicRange(inmap):
 	minVal = np.min(inmap)
 	maxVal = np.max(inmap)
