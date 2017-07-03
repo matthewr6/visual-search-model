@@ -414,10 +414,11 @@ def corresponding_points(ox, oy, stride, size):
 	points = []
 	# w = int(np.round(stride/4.0))
 	w = 0
-	x = ox * (w + stride)
+	diff = int(np.round(stride * 0.75))
+	x = ox * (w + diff)
 	for i in range(stride):
 		# print x
-		y = oy * (w + stride)
+		y = oy * (w + diff)
 		for j in range(stride):
 			if x < size and y < size:
 				points.append((x, y))
@@ -433,7 +434,7 @@ def priorityMap(lipMap,originalImgSize): #Eq 6 sum over scales
 	priorityMap = np.zeros(originalImgSize)
 	# priorityMap = np.zeros([wdt, hgt]) # v2
 
-	used_points = []
+	pointsUsed = np.zeros(originalImgSize)
 
 	# v3
 	for scale in xrange(len(lipMap)): # iterating over images
@@ -441,11 +442,20 @@ def priorityMap(lipMap,originalImgSize): #Eq 6 sum over scales
 		dims = lip_S.shape
 		# stride = computeFinalStride(scale)
 		stride = int(np.round(opt.S1RFSIZES[scale]))
-		print scale
+		print stride
 		for i in xrange(dims[0]): # iterate over pixels of LIP (smaller than image.)
 			for j in xrange(dims[1]):
 				for x, y in corresponding_points(i, j, stride, 256):
 					priorityMap[x, y] += lip_S[i, j]
+					pointsUsed[x, y] += 1
+
+	priorityMap = np.divide(priorityMap, pointsUsed)
+
+	# dims = priorityMap.shape
+	# for i in xrange(dims[0]):
+	# 	for j in xrange(dims[1]):
+	# 		# print pointsUsed[i, j], priorityMap[x, y]
+	# 		priorityMap[x, y] /= float(pointsUsed[i, j])
 
 	# v1
 	# for scale in xrange(len(lipMap)): # iterating over images
