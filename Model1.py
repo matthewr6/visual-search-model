@@ -345,7 +345,6 @@ def feedbackSignal(objprots, targetIndx, imgC2b): #F(o,P), Eq 4
 	# 	#compute max over the 12 scales and store as a row in our c2b matrix
 	# 	c2b[obj_id] = np.max(np.asarray(max_acts),axis=0)
 
-	
 	C2bavg = getC2bAverage(objprots)	#changed from objprots
 	print 'C2bavg shape', C2bavg.shape
 	print 'Target c2b shape', len(objprots), objprots[0].shape 
@@ -354,8 +353,9 @@ def feedbackSignal(objprots, targetIndx, imgC2b): #F(o,P), Eq 4
 #	feedback = ((feedback - np.min(feedback))/np.max(feedback))+1
 	feedback = feedback - np.min(feedback)
 	feedback = feedback / np.max(feedback)
+	# feedback *= 4.0
 	feedback += 1.0
-	#print 'Feedback after normalization: ', feedback, np.min(feedback), np.max(feedback)
+	# print 'Feedback after normalization: ', feedback, np.min(feedback), np.max(feedback)
 	return feedback
 
 def scale(arr):
@@ -378,8 +378,7 @@ def topdownModulation(S2boutputs,feedback): #LIP MAP
 	for scale in xrange(len(S2boutputs)):
 		S2bsum = np.sum(S2boutputs[scale], axis = 2)
 		S2bsum = S2bsum[:,:,np.newaxis]
-		lip = (S2boutputs[scale] * feedback)
-		lip = lip / (S2bsum + opt.STRNORMLIP)
+		lip = (S2boutputs[scale] * feedback)/(S2bsum + opt.STRNORMLIP)
 		lipMap.append(lip)
 	return lipMap
 
@@ -447,7 +446,6 @@ def priorityMap(lipMap,originalImgSize): #Eq 6 sum over scales
 		dims = lip_S.shape
 		# stride = computeFinalStride(scale)
 		stride = int(np.round(opt.S1RFSIZES[scale]))
-		print stride
 		for i in xrange(dims[0]): # iterate over pixels of LIP (smaller than image.)
 			for j in xrange(dims[1]):
 				for x, y in corresponding_points(i, j, stride, 256):

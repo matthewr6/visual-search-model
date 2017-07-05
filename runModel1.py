@@ -3,6 +3,7 @@ import sys
 import cPickle
 import Model1
 import scipy.misc
+from scipy.ndimage.filters import gaussian_filter
 import numpy as np
 import time
 import sys
@@ -13,15 +14,20 @@ import ModelOptions1 as opt
 reload(opt)
 reload(Model1) 
 
+beginning = 372
+change = 10
+
 
 # Build filters
 s1filters = Model1.buildS1filters()
 print 'Loaded s1 filters'
 protsfile = open('imgprots.dat', 'rb')
-imgprots = cPickle.load(protsfile)
+imgprots = cPickle.load(protsfile)#[beginning:beginning+change]
 print 'Loading objprots filters'
 protsfile = open('objprotsCorrect.dat', 'rb')
 objprots = cPickle.load(protsfile)
+for idx, _ in enumerate(objprots):
+    objprots[idx] = objprots[idx]#[beginning:beginning+change]
 # objprots = objprots[0:-1] # NOTE THIS IS HACK because objprots was generated from a folder with 41 instead of 40 images. Getting rid of the last img.
 print 'Objprots shape:', len(objprots), objprots[0].shape
 protsfile = open('naturalImgC2b.dat', 'rb')
@@ -39,12 +45,12 @@ hat=0
 butterfly=13
 binoculars = 8
 
-targetIndex = hat
+targetIndex = binoculars
 scaleSize = 8
-protID = 150
+protID = 0
 print 'Obj names', objNames[targetIndex]
 
-img = scipy.misc.imread('example.png')
+img = scipy.misc.imread('example1.png')
 S1outputs = Model1.runS1layer(img, s1filters)
 #sif, minV, maxV = Model1.imgDynamicRange(np.mean(S1outputs[scaleSize], axis = 2))
 #print 'Sif: ', sif.shape, 'Max: ', maxV, 'Min: ', minV
@@ -59,6 +65,7 @@ S2boutputs = Model1.runS2blayer(C1outputs, imgprots)
 
 # C2boutputs = Model1.runC1layer(S2boutputs)
 feedback = Model1.feedbackSignal(objprots, targetIndex, imgC2b)
+print 'feedback info: ', feedback.shape
 lipmap = Model1.topdownModulation(S2boutputs,feedback) 
 print 'lipmap shape: ', len(lipmap), lipmap[0].shape
 #lm, minV, maxV = Model1.imgDynamicRange(lipmap[scaleSize][:,:,protID])
@@ -128,7 +135,29 @@ if 'b' in whichgraph:
     	for j in xrange(dims[0]):
     		tmp = pmap[i,j]
     		pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
-    plt.imshow(pmap)
+    plt.imshow(gaussian_filter(pmap, sigma=3))
+
+if 'c' in whichgraph:
+
+    fig,ax = plt.subplots(nrows = numRows, ncols = change)
+    plt.gray()  # show the filtered result in grayscale
+
+    for i in xrange(change):
+        for j, scale in enumerate(S2boutputs):
+            s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,i])
+            ax[j,i].imshow(s2b)
+
+
+if 'd' in whichgraph:
+
+    fig,ax = plt.subplots(nrows = numRows, ncols = change)
+    plt.gray()  # show the filtered result in grayscale
+    plt.axis('off')
+
+    for i in xrange(change):
+        for j, scale in enumerate(lipmap):
+            s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,i])
+            ax[j,i].imshow(s2b)
 
 
 plt.show()
