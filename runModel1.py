@@ -45,7 +45,7 @@ hat=0
 butterfly=13
 binoculars = 8
 
-targetIndex = binoculars
+targetIndex = hat
 scaleSize = 8
 protID = 0
 print 'Obj names', objNames[targetIndex]
