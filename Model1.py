@@ -5,6 +5,7 @@ import pdb
 import numpy as np
 import scipy.misc as sm
 import scipy.signal
+from scipy import stats
 import math
 import scipy.ndimage.filters as snf
 import os
@@ -278,8 +279,9 @@ def runS2blayer(C1outputs, prots):
 def runS3layer(S2boutputs, prots):
 	print 'Running S3 layer' 
 	# Only check 3 smallest scales, pg 9, 1st paragraph
+	# print len(S2boutputs)
 	S2bsmall = S2boutputs[0:3]
-	output=[]
+	output=[] # want to end up 40 x 43
 	# For each scale, extract the stack of input C layers of that scale...
 	for  scaleNum, Cthisscale in enumerate(S2bsmall):
 		print '------------------------------'
@@ -288,17 +290,20 @@ def runS3layer(S2boutputs, prots):
 	# then there's no point in computing the S output; we return a depth-column 
 	# of 0s instead
 	# Note that we're assuming all the prototypes to have the same siz
-		if prots[0].shape[0] >= Cthisscale.shape[0]:
-			print 'Cinput map too small!'
-			outputthisscale = [0] * len(prots)
-			output.append(np.dstack(outputthisscale[:]))
-			continue
+		print Cthisscale.shape
+		print len(prots)
+		print len(prots[0]) # prots is 40 x 43 x 600
+		# if prots[0].shape[0] >= Cthisscale.shape[0]:
+		# 	print 'Cinput map too small!'
+		# 	outputthisscale = [0] * len(prots)
+		# 	output.append(np.dstack(outputthisscale[:]))
+		# 	continue
 
 		outputthisscale=[]
-		for nprot, thisprot in enumerate(prots):
+		for nprot, thisprot in enumerate(prots): # going over objects
 			# Filter cross-correlation !
-			#print 'Cross corr step: ', nprot, prots[nprot].shape, ' Scale:', Cthisscale.shape
-			tmp = myNormCrossCorr(Cthisscale, thisprot)         
+			print 'Cross corr step: ', nprot, prots[nprot].shape, ' Scale:', Cthisscale.shape
+			tmp = myNormCrossCorr(Cthisscale, thisprot)
 			outputthisscale.append(tmp)
 			assert np.max(tmp) < 1
 		output.append(np.dstack(outputthisscale[:]))
@@ -353,8 +358,9 @@ def feedbackSignal(objprots, targetIndx, imgC2b): #F(o,P), Eq 4
 #	feedback = ((feedback - np.min(feedback))/np.max(feedback))+1
 	feedback = feedback - np.min(feedback)
 	feedback = feedback / np.max(feedback)
-	# feedback *= 4.0
+	# feedback *= 9.0 # 1 to 10.  try scaling exponentially or quadratically next
 	feedback += 1.0
+	feedback = feedback ** 2.0
 	# print 'Feedback after normalization: ', feedback, np.min(feedback), np.max(feedback)
 	return feedback
 
@@ -588,15 +594,58 @@ def buildS3Prots(numprots, s1filters, imgProts):
 			S1outputs = runS1layer(img, s1filters)
 			C1outputs = runC1layer(S1outputs)
 			S2boutputs = runS2blayer(C1outputs, imgProts)
-			prots[pnum].append(extractS3Vector(S2boutputs))
+			e = extractS3Vector(S2boutputs)
+			print S2boutputs.shape, e.shape
+			prots[pnum].append(e)
 	return prots
 
-	
+def gauss_2d(focus_x, focus_y, sigma):
+	# inverTED vs inverSE?  inverTED may not be the same as inverSE
+	dims = [256, 256]
+	grid = np.empty(dims)
+	for i in xrange(dims[0]):
+		for j in xrange(dims[1]):
+			grid[i, j] = stats.norm.pdf(i, focus_y, sigma) * stats.norm.pdf(j, focus_x, sigma)
+	return grid
 
+def inhibitionOfReturn(prio):
+	relative_focus = np.argmax(prio)
+	img_size = 256.0*256.0
+	focus_y = math.floor(relative_focus/256)
+	focus_x = relative_focus % 256
+	# k = 0.2 paper used this
+	# sigma = 16.667 paper used this
+	g = (1.0 - opt.GAUSSFACTOR*gauss_2d(focus_x, focus_y, opt.IORSIGMA))
+	# print g
+	# print prio
+	# print prio * g
+	return prio * g, focus_x, focus_y
 
+def prio_modulation(prio, s2boutputs):
+	for idx, scale in enumerate(s2boutputs):
+		rs = sm.imresize(prio, scale.shape[:2])
+		for i in xrange(600):
+			s2boutputs[idx][:,:,i] *= rs
+	return s2boutputs
 
+# def crop_s2boutputs(s2boutputs, prio):
+# 	relative_focus = np.argmax(prio)
+# 	img_size = 256.0*256.0
+# 	fy = math.floor(relative_focus/256)
+# 	fx = relative_focus % 256
 
+# 	cropped = []
 
+# 	for idx, scale in enumerate(s2boutputs):
+# 		sfx = int(fx * scale.shape[0]/256.0)
+# 		sfy = int(fy * scale.shape[1]/256.0)
+# 		window_radius = int(math.ceil((scale.shape[0]/9.0)/2.0)) # assuming square.
+# 		right_bound = max(sfx + window_radius, scale.shape[0] - window_radius - 1)
+# 		left_bound = min(sfx - window_radius, window_radius)
+# 		top_bound = min(sfy + window_radius, scale.shape[0] - window_radius - 1)
+# 		bottom_bound = max(sfy - window_radius, window_radius)
+# 		print bottom_bound, top_bound, left_bound, right_bound
+# 		cropped.append(scale[bottom_bound:top_bound, left_bound:right_bound])
+# 		print cropped[-1].shape
 
-
-
+# 	return cropped
