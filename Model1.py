@@ -312,15 +312,40 @@ def runS2blayer(C1outputs, prots):
 # 	print 'S3 layer shape: ', len(output), output[0].shape
 # 	return output
 
+def scale_maxes(scales):
+	final = [] # want to be 600 long
+	for scale in scales:
+		# scale.shape is n x n x 600
+		scale_set = [] # will end up being 600 x 1
+		for prot_idx in xrange(scale.shape[2]):
+			scale_set.append(np.amax(scale[:,:,prot_idx]))
+		final.append(scale_set)
+	# final should currently be 3 x 600
+	return np.mean(final, axis=0)
+
+def avg_spearman(a, b):
+	spearman_mat = stats.spearmanr(a, b, axis=1)
+	lower = np.tril(spearman_mat, k=-1)
+	value_count = np.count_nonzero(lower)
+	# data[data == 0] = np.nan
+	# means = np.nanmean(data[:, 1:], axis=1)
+	return np.sum(lower)/value_count
+
 def runS3layer(S2boutputs, prots):
 	print 'Running S3 layer'
 	S2bsmall = S2boutputs[:3] # 3 x n x n x 600
 	final_output = [] # want to end up with 40 x 43
+	maxes = np.reshape(scale_maxes(S2bsmall), (1, 600))
+	print maxes.shape
+	# print maxes
 	for prot_idx, thisprot in enumerate(prots):
-		# prots is 40 x 43 x 600, thisprot s 43 x 600
+		# thisprot is 43 x 600
 		print 'Working on prot_idx: ', prot_idx
-		s2b_maxes = [np.amax(arr) for arr in np.swapaxes(S2bsmall, 0, 3)] # want to find max of the 3 x n x n? so switch it to 600 x n x n x 3
-		final_output.append(prot_output) # want to append an array of 43 objects
+		# S2bsmall is an array 3 of numpy arrays that are n x n x 600
+		# print maxes.shape
+		# prot_output = # correlation w/prots
+		stacked = np.vstack(thisprot)
+		final_output.append(avg_spearman(maxes, stacked)) # want to append an array of 43 objects
 
 	return final_output
 
