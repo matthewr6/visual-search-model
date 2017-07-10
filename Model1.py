@@ -276,39 +276,53 @@ def runS2blayer(C1outputs, prots):
 	print 'S2b layer shape: ', len(output), output[0].shape
 	return output
 
-def runS3layer(S2boutputs, prots):
-	print 'Running S3 layer' 
-	# Only check 3 smallest scales, pg 9, 1st paragraph
-	# print len(S2boutputs)
-	S2bsmall = S2boutputs[0:3]
-	output=[] # want to end up 40 x 43
-	# For each scale, extract the stack of input C layers of that scale...
-	for  scaleNum, Cthisscale in enumerate(S2bsmall):
-		print '------------------------------'
-		print 'Working on scale: ', scaleNum
-	# If the C input maps are too small, as in, smaller than the S filter,
-	# then there's no point in computing the S output; we return a depth-column 
-	# of 0s instead
-	# Note that we're assuming all the prototypes to have the same siz
-		print Cthisscale.shape
-		print len(prots)
-		print len(prots[0]) # prots is 40 x 43 x 600
-		# if prots[0].shape[0] >= Cthisscale.shape[0]:
-		# 	print 'Cinput map too small!'
-		# 	outputthisscale = [0] * len(prots)
-		# 	output.append(np.dstack(outputthisscale[:]))
-		# 	continue
+# def runS3layer(S2boutputs, prots):
+# 	print 'Running S3 layer' 
+# 	# Only check 3 smallest scales, pg 9, 1st paragraph
+# 	# print len(S2boutputs)
+# 	S2bsmall = S2boutputs[0:3]
+# 	output=[] # want to end up 40 x 43
+# 	# For each scale, extract the stack of input C layers of that scale...
+# 	for  scaleNum, Cthisscale in enumerate(S2bsmall):
+# 		print '------------------------------'
+# 		print 'Working on scale: ', scaleNum
+# 	# If the C input maps are too small, as in, smaller than the S filter,
+# 	# then there's no point in computing the S output; we return a depth-column 
+# 	# of 0s instead
+# 	# Note that we're assuming all the prototypes to have the same siz
+# 		print Cthisscale.shape
+# 		print len(prots)
+# 		print len(prots[0]) # prots is 40 x 43 x 600
+# 		# if prots[0].shape[0] >= Cthisscale.shape[0]:
+# 		# 	print 'Cinput map too small!'
+# 		# 	outputthisscale = [0] * len(prots)
+# 		# 	output.append(np.dstack(outputthisscale[:]))
+# 		# 	continue
 
-		outputthisscale=[]
-		for nprot, thisprot in enumerate(prots): # going over objects
-			# Filter cross-correlation !
-			print 'Cross corr step: ', nprot, prots[nprot].shape, ' Scale:', Cthisscale.shape
-			tmp = myNormCrossCorr(Cthisscale, thisprot)
-			outputthisscale.append(tmp)
-			assert np.max(tmp) < 1
-		output.append(np.dstack(outputthisscale[:]))
-	print 'S3 layer shape: ', len(output), output[0].shape
-	return output
+# 		outputthisscale=[]
+# 		for nprot, thisprot in enumerate(prots): # going over objects
+# 			# thisprot is 43 x 600
+# 			# Cthisscale.shape is n x n x 600
+# 			# Filter cross-correlation !
+# 			print 'Cross corr step: ', nprot, prots[nprot].shape, ' Scale:', Cthisscale.shape
+# 			tmp = myNormCrossCorr(Cthisscale, thisprot)
+# 			outputthisscale.append(tmp)
+# 			assert np.max(tmp) < 1
+# 		output.append(np.dstack(outputthisscale[:]))
+# 	print 'S3 layer shape: ', len(output), output[0].shape
+# 	return output
+
+def runS3layer(S2boutputs, prots):
+	print 'Running S3 layer'
+	S2bsmall = S2boutputs[:3] # 3 x n x n x 600
+	final_output = [] # want to end up with 40 x 43
+	for prot_idx, thisprot in enumerate(prots):
+		# prots is 40 x 43 x 600, thisprot s 43 x 600
+		print 'Working on prot_idx: ', prot_idx
+		s2b_maxes = [np.amax(arr) for arr in np.swapaxes(S2bsmall, 0, 3)] # want to find max of the 3 x n x n? so switch it to 600 x n x n x 3
+		final_output.append(prot_output) # want to append an array of 43 objects
+
+	return final_output
 
 def runC3layer(S3outputs):
 	print "Running  C3 group (global max of S3 inputs)"

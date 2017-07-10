@@ -120,6 +120,7 @@ priorityMap = Model1.priorityMap(lipmap,[256,256])
 #     priorityMap = Model1.inhibitionOfReturn(priorityMap)
 
 t = Model1.runS3layer(S2boutputs, s3prots)
+print t
 # t2 = Model1.runC3layer(t)
 
 # print t2
