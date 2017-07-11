@@ -6,6 +6,7 @@ import numpy as np
 import scipy.misc as sm
 import scipy.signal
 from scipy import stats
+from scipy import spatial
 import math
 import scipy.ndimage.filters as snf
 import os
@@ -266,7 +267,7 @@ def runS2blayer(C1outputs, prots):
 			continue
 
 		outputthisscale=[]
-		for nprot, thisprot in enumerate(prots):
+		for nprot, thisprot in enumerate(prots): # thisprot is 9x9x4
 			# Filter cross-correlation !
 			#print 'Cross corr step: ', nprot, prots[nprot].shape, ' Scale:', Cthisscale.shape
 			tmp = myNormCrossCorr(Cthisscale, thisprot)         
@@ -321,7 +322,7 @@ def scale_maxes(scales):
 			scale_set.append(np.amax(scale[:,:,prot_idx]))
 		final.append(scale_set)
 	# final should currently be 3 x 600
-	return np.mean(final, axis=0)
+	return np.mean(final, axis=0) # 600-length, 1D
 
 def avg_spearman(a, b):
 	spearman_mat = stats.spearmanr(a, b, axis=1)
@@ -331,37 +332,37 @@ def avg_spearman(a, b):
 	# means = np.nanmean(data[:, 1:], axis=1)
 	return np.sum(lower)/value_count
 
+def comparison(a, b):
+	return stats.spearmanr(a, b)[0]
+	# return spatial.distance.euclidean(a, b)
+	# return np.dot(a, b)
+
 def runS3layer(S2boutputs, prots):
 	print 'Running S3 layer'
 	S2bsmall = S2boutputs[:3] # 3 x n x n x 600
 	final_output = [] # want to end up with 40 x 43
-	maxes = np.reshape(scale_maxes(S2bsmall), (1, 600))
-	print maxes.shape
-	# print maxes
+	# S2bsmall is an array 3 of numpy arrays that are n x n x 600
+	maxes = scale_maxes(S2bsmall)
 	for prot_idx, thisprot in enumerate(prots):
 		# thisprot is 43 x 600
-		print 'Working on prot_idx: ', prot_idx
-		# S2bsmall is an array 3 of numpy arrays that are n x n x 600
-		# print maxes.shape
-		# prot_output = # correlation w/prots
-		stacked = np.vstack(thisprot)
-		final_output.append(avg_spearman(maxes, stacked)) # want to append an array of 43 objects
+		subprots = []
+		for points in thisprot:
+			subprots.append(comparison(points, maxes))
+		final_output.append(subprots) # append a 43-length array of floats
 
-	return final_output
+	return final_output # 40 long, and each item is 43 long
 
 def runC3layer(S3outputs):
 	print "Running  C3 group (global max of S3 inputs)"
-	outputs=np.zeros(S3outputs[0].shape[2])
-	for Sthisscale in S3outputs:
-		wdt, lgt, depth = Sthisscale.shape
-		# The number of prototypes had better be the same for all scales!
-		assert depth == S3outputs[0].shape[2] 
-		for p in range(depth):
-			outputs[p] = max(outputs[p], np.max(Sthisscale[:,:,p]))
 
-	print 'Max activation for object: ', np.argmax(outputs)
+	summed = [np.sum(a) for a in S3outputs]
 
-	return outputs 
+	print summed
+
+	print 'Max activation for object: ', np.argmax(summed)
+	print 'Min activation for object: ', np.argmin(summed)
+
+	return np.argmax(summed) 
 
 def getC2bAverage(objprots):
 	'''
@@ -498,41 +499,7 @@ def priorityMap(lipMap,originalImgSize): #Eq 6 sum over scales
 					pointsUsed[x, y] += 1
 
 	priorityMap = np.divide(priorityMap, pointsUsed)
-
-	# dims = priorityMap.shape
-	# for i in xrange(dims[0]):
-	# 	for j in xrange(dims[1]):
-	# 		# print pointsUsed[i, j], priorityMap[x, y]
-	# 		priorityMap[x, y] /= float(pointsUsed[i, j])
-
-	# v1
-	# for scale in xrange(len(lipMap)): # iterating over images
-	# 	lip_S = np.sum(lipMap[scale],axis=2)
-	# 	dims = lip_S.shape
-	# 	stride = computeFinalStride(scale)
-	# 	print stride
-	# 	for i in xrange(dims[0]):
-	# 		for j in xrange(dims[1]):
-	# 			priorityMap[i*stride,j*stride] += lip_S[i,j]
-	
-
-	# v2
-	# dims = (wdt, hgt)
-	# for scale in xrange(len(lipMap)): # iterating over images
-	# 	lip_S = np.sum(lipMap[scale],axis=2)
-	# 	lip_dims = lip_S.shape
-	# 	for i in xrange(dims[0]):
-	# 		rel_x = float(i)/dims[0]
-	# 		for j in xrange(dims[1]):
-	# 			rel_y = float(j)/dims[1]
-	# 			# priorityMap[next_x, next_y] += lip_S[i,j]
-	# 			priorityMap[i, j] += rel_2d_value(lip_S, rel_x, rel_y)
-
-
-	# return priorityMap
 	return priorityMap
-
-
 
 
 def buildImageProts(numProts, s1filters): 
@@ -555,11 +522,11 @@ def buildImageProts(numProts, s1filters):
 		prots.append(extract3DPatch(C1outputs, nbkeptweights = opt.NBKEPTWEIGHTS))
 	return prots
 
-def buildObjProts(s1filters, imgProts): #computing C2b
+def buildObjProts(s1filters, imgProts, resize=False): #computing C2b
 	print 'Building object protoypes' 
-	imgfiles = os.listdir(opt.IMAGESFORPROTS) #changed IMAGESFOROBJPROTS to IMAGESFORPROTS
+	imgfiles = os.listdir(opt.IMAGESFOROBJPROTS) #changed IMAGESFOROBJPROTS to IMAGESFORPROTS
 	print imgfiles
-	
+
 	prots = [0 for i in range(len(imgfiles)-1)]
 	print 'Prots length: ', len(prots)
 	for n in range(len(imgfiles)):
@@ -570,12 +537,15 @@ def buildObjProts(s1filters, imgProts): #computing C2b
 			continue
 		tmp = imgfile.strip().split('.')
 		#added:
-		tmp1 = tmp[0].split('_')
-		#add finish
-		pnum = (int(tmp1[1])) -1
+		# tmp1 = tmp[0].split('_')
+		# add finish
+		# pnum = (int(tmp1[1])) -1
+		pnum = int(tmp[0]) - 1
 		print 'pnum: ', pnum		
 
-		img = sm.imread(opt.IMAGESFORPROTS+'/'+imgfile) # changed IMAGESFOROBJPROTS to get 250 nat images c2b vals
+		img = sm.imread(opt.IMAGESFOROBJPROTS+'/'+imgfile) # changed IMAGESFOROBJPROTS to get 250 nat images c2b vals
+		if resize:
+			img = sm.imresize(img, (64, 64))
 		
 		t = time.time()
 		S1outputs = runS1layer(img, s1filters)
@@ -609,7 +579,7 @@ def getObjNames():
 
 	
 
-def buildS3Prots(numprots, s1filters, imgProts):
+def buildS3Prots(numprots, s1filters, imgProts, resize=False):
 	print 'Building S3 prots'
 	imgfiles = os.listdir(opt.IMAGESFOROBJPROTS)
 	print 'Numfiles is: ', len(imgfiles), 'Using files: ', (len(imgfiles)-1) 
@@ -627,6 +597,8 @@ def buildS3Prots(numprots, s1filters, imgProts):
 		print 'pnum: ', pnum		
 
 		img = sm.imread(opt.IMAGESFOROBJPROTS+'/'+imgfile)
+		if resize:
+			img = sm.imresize(img, (64, 64))
 		
 		for n in range(numProtsPerObj):
 			print 'Prot number', n, 'select image: ',  imgfile
@@ -634,7 +606,6 @@ def buildS3Prots(numprots, s1filters, imgProts):
 			C1outputs = runC1layer(S1outputs)
 			S2boutputs = runS2blayer(C1outputs, imgProts)
 			e = extractS3Vector(S2boutputs)
-			print S2boutputs.shape, e.shape
 			prots[pnum].append(e)
 	return prots
 
@@ -661,30 +632,43 @@ def inhibitionOfReturn(prio):
 	return prio * g, focus_x, focus_y
 
 def prio_modulation(prio, s2boutputs):
+	# prio = (prio - np.min(prio))/np.max(prio)
 	for idx, scale in enumerate(s2boutputs):
 		rs = sm.imresize(prio, scale.shape[:2])
 		for i in xrange(600):
 			s2boutputs[idx][:,:,i] *= rs
 	return s2boutputs
 
-# def crop_s2boutputs(s2boutputs, prio):
-# 	relative_focus = np.argmax(prio)
-# 	img_size = 256.0*256.0
-# 	fy = math.floor(relative_focus/256)
-# 	fx = relative_focus % 256
+def crop_s2boutputs(s2boutputs, prio):
+	relative_focus = np.argmax(prio)
+	img_size = 256.0*256.0
+	fy = math.floor(relative_focus/256)
+	fx = relative_focus % 256
 
-# 	cropped = []
+	cropped = []
 
-# 	for idx, scale in enumerate(s2boutputs):
-# 		sfx = int(fx * scale.shape[0]/256.0)
-# 		sfy = int(fy * scale.shape[1]/256.0)
-# 		window_radius = int(math.ceil((scale.shape[0]/9.0)/2.0)) # assuming square.
-# 		right_bound = max(sfx + window_radius, scale.shape[0] - window_radius - 1)
-# 		left_bound = min(sfx - window_radius, window_radius)
-# 		top_bound = min(sfy + window_radius, scale.shape[0] - window_radius - 1)
-# 		bottom_bound = max(sfy - window_radius, window_radius)
-# 		print bottom_bound, top_bound, left_bound, right_bound
-# 		cropped.append(scale[bottom_bound:top_bound, left_bound:right_bound])
-# 		print cropped[-1].shape
+	for idx, scale in enumerate(s2boutputs):
+		sfx = int(fx * scale.shape[0]/256.0)
+		sfy = int(fy * scale.shape[1]/256.0)
+		window_radius = int(math.ceil((scale.shape[0]/3.0)/2.0)) # assuming square.
 
-# 	return cropped
+		x_size, y_size = scale.shape[:2]
+
+		if x_size - sfx < window_radius:
+			sfx = x_size - window_radius
+		if sfx < window_radius:
+			sfx = window_radius
+
+		if y_size - sfy < window_radius:
+			sfy = y_size - window_radius
+		if sfy < window_radius:
+			sfy = window_radius
+
+		right_bound = min(sfx + window_radius, x_size)
+		left_bound = max(sfx - window_radius, 0)
+		top_bound = min(sfy + window_radius, y_size)
+		bottom_bound = max(sfy - window_radius, 0)
+		print bottom_bound, top_bound, left_bound, right_bound
+		cropped.append(scale[bottom_bound:top_bound, left_bound:right_bound])
+
+	return cropped

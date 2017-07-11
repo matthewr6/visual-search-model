@@ -60,9 +60,9 @@ lobster = 22
 accordion = 1
 turtle = 38
 
-targetIndex = hat
+targetIndex = spiral
 stimnum = 8
-location = (0, 1) # ZERO INDEXED
+location = (0, 2) # ZERO INDEXED
 
 scaleSize = 8
 protID = 0
@@ -79,8 +79,8 @@ def check_bounds(x, y):
     print x, y, bounds
     return x >= bounds[0] and x <= bounds[1] and y >= bounds[2] and y <= bounds[3]
 
-img = scipy.misc.imread('example.png')
-# img = scipy.misc.imread('stimuli/1.array{}.ot.png'.format(stimnum))
+# img = scipy.misc.imread('example.png')
+img = scipy.misc.imread('stimuli/1.array{}.ot.png'.format(stimnum))
 S1outputs = Model1.runS1layer(img, s1filters)
 #sif, minV, maxV = Model1.imgDynamicRange(np.mean(S1outputs[scaleSize], axis = 2))
 #print 'Sif: ', sif.shape, 'Max: ', maxV, 'Min: ', minV
@@ -114,14 +114,18 @@ priorityMap = Model1.priorityMap(lipmap,[256,256])
 
 # print i, found
 
-# S2boutputs = Model1.prio_modulation(priorityMap, S2boutputs[:3]) # only doing first three scales
 # inhibitions = 1
 # for i in xrange(inhibitions):
 #     priorityMap = Model1.inhibitionOfReturn(priorityMap)
 
-t = Model1.runS3layer(S2boutputs, s3prots)
-print t
-# t2 = Model1.runC3layer(t)
+
+modulated_s2boutputs = Model1.prio_modulation(priorityMap, S2boutputs)
+# cropped_s2boutputs = Model1.crop_s2boutputs(modulated_s2boutputs, priorityMap)
+cropped_s2boutputs = modulated_s2boutputs
+t = Model1.runS3layer(cropped_s2boutputs, s3prots)
+# print t
+t2 = Model1.runC3layer(t)
+print t2
 
 # print t2
 # priorityMap = Model1.inhibitionOfReturn(priorityMap)
@@ -131,7 +135,7 @@ print 'Feedback signal shape: ', feedback.shape
 numCols = 5
 numRows = 12
 
-whichgraph = 'ab'
+whichgraph = 'a'
 
 
 if 'a' in whichgraph:
@@ -210,6 +214,22 @@ if 'd' in whichgraph:
         for j, scale in enumerate(lipmap):
             s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,i])
             ax[j,i].imshow(s2b)
+
+if 'e' in whichgraph:
+    fig,ax = plt.subplots(nrows = numRows, ncols = 2)
+    plt.gray()  # show the filtered result in grayscale
+    i = 0
+    for scale in cropped_s2boutputs:
+        #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
+        s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
+        ax[i,0].imshow(s2b)
+        i += 1
+    i = 0
+    for scale in modulated_s2boutputs:
+        #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
+        s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
+        ax[i,1].imshow(s2b)
+        i += 1
 
 
 plt.show()
