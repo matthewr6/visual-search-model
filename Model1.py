@@ -424,7 +424,7 @@ def topdownModulation(S2boutputs,feedback): #LIP MAP
 	for scale in xrange(len(S2boutputs)):
 		S2bsum = np.sum(S2boutputs[scale], axis = 2)
 		S2bsum = S2bsum[:,:,np.newaxis]
-		lip = (S2boutputs[scale] * feedback)/(S2bsum + opt.STRNORMLIP)
+		lip = (S2boutputs[scale] * feedback)#/(S2bsum + opt.STRNORMLIP)
 		lipMap.append(lip)
 	return lipMap
 
