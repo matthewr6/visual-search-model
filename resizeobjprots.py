@@ -28,6 +28,6 @@ with open('imgprots.dat', 'rb') as f:
 # with open('resizedobjprots.dat', 'wb') as f:
 #     cPickle.dump(objprots, f, protocol=-1)
 
-s3prots = Model1.buildS3Prots(1720, s1filters, imgprots)
+s3prots = Model1.buildS3Prots(1720, s1filters, imgprots, resize=True)
 with open('resizeds3prots.dat', 'wb') as f:
     cPickle.dump(s3prots, f, protocol=-1)

@@ -61,8 +61,8 @@ lobster = 22
 accordion = 1
 turtle = 38
 
-targetIndex = statue
-stimnum = 4
+targetIndex = hat
+stimnum = 6
 location = (0, 2) # ZERO INDEXED
 
 scaleSize = 8
@@ -119,15 +119,15 @@ priorityMap = Model1.priorityMap(lipmap,[256,256])
 # for i in xrange(inhibitions):
 #     priorityMap = Model1.inhibitionOfReturn(priorityMap)
 
-modulated_s2boutputs = Model1.prio_modulation(priorityMap, S2boutputs)
-# cropped_s2boutputs = Model1.crop_s2boutputs(modulated_s2boutputs, priorityMap)
-cropped_s2boutputs = modulated_s2boutputs
-t = Model1.runS3layer(cropped_s2boutputs, s3prots, priorityMap)
-# print t
-t2 = Model1.runC3layer(t)
-print t2
-print stimnum, 'stimnum'
-print targetIndex
+# modulated_s2boutputs = Model1.prio_modulation(priorityMap, S2boutputs)
+# # cropped_s2boutputs = Model1.crop_s2boutputs(modulated_s2boutputs, priorityMap)
+# cropped_s2boutputs = modulated_s2boutputs
+# t = Model1.runS3layer(cropped_s2boutputs, s3prots, priorityMap)
+# # print t
+# t2 = Model1.runC3layer(t)
+# print t2
+# print stimnum, 'stimnum'
+# print targetIndex
 
 # print t2
 # priorityMap = Model1.inhibitionOfReturn(priorityMap)
@@ -137,7 +137,7 @@ print 'Feedback signal shape: ', feedback.shape
 numCols = 5
 numRows = 12
 
-whichgraph = 'b'
+whichgraph = 'ab'
 
 
 if 'a' in whichgraph:
@@ -182,18 +182,24 @@ if 'a' in whichgraph:
 
 if 'b' in whichgraph:
 
-    plt.figure()
+    fig,ax = plt.subplots(nrows = 1, ncols = 2)
     plt.gray()
     pmap, minV, maxV = Model1.imgDynamicRange(priorityMap)
     dims = pmap.shape
-    print dims
     pmap = Model1.scale(priorityMap)
     for i in xrange(dims[0]):
         for j in xrange(dims[0]):
             tmp = pmap[i,j]
-            # pmap[i,j]= np.exp(np.exp(tmp))
-            pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
-    plt.imshow(gaussian_filter(pmap, sigma=3))
+            pmap[i,j]= np.exp(np.exp(tmp))
+            # pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
+    ax[0].imshow(gaussian_filter(pmap, sigma=3))
+
+    for i in xrange(dims[0]):
+        for j in xrange(dims[0]):
+            tmp = pmap[i,j]
+            pmap[i,j]= np.exp(tmp)
+            # pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
+    ax[1].imshow(gaussian_filter(pmap, sigma=3))
 
 if 'c' in whichgraph:
 

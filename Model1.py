@@ -350,8 +350,8 @@ def runS3layer(S2boutputs, prots, prio_map):
 	final_output = [] # want to end up with 40 x 43
 	# S2bsmall is an array 3 of numpy arrays that are n x n x 600
 	maxes = scale_maxes(S2bsmall, prio_map)
-	import matplotlib.pyplot as plt
-	plt.plot(np.arange(len(maxes)), maxes)
+	# import matplotlib.pyplot as plt
+	# plt.plot(np.arange(len(maxes)), maxes)
 	for prot_idx, thisprot in enumerate(prots):
 		# thisprot is 43 x 600
 		subprots = []
@@ -407,9 +407,9 @@ def feedbackSignal(objprots, targetIndx, imgC2b): #F(o,P), Eq 4
 #	feedback = ((feedback - np.min(feedback))/np.max(feedback))+1
 	feedback = feedback - np.min(feedback)
 	feedback = feedback / np.max(feedback)
-	# feedback *= 9.0 # 1 to 10.  try scaling exponentially or quadratically next
+	# feedback *= 4.0 # 1 to 10.  try scaling exponentially or quadratically next
 	feedback += 1.0
-	feedback = feedback ** 2.0
+	# feedback = feedback ** 2.0
 	# print 'Feedback after normalization: ', feedback, np.min(feedback), np.max(feedback)
 	return feedback
 
@@ -616,6 +616,7 @@ def buildS3Prots(numprots, s1filters, imgProts, resize=False):
 			S2boutputs = runS2blayer(C1outputs, imgProts)
 			e = extractS3Vector(S2boutputs)
 			prots[pnum].append(e)
+		print 'major percent', float(i)/len(imgfiles)
 	return prots
 
 def gauss_2d(focus_x, focus_y, sigma):
