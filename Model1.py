@@ -313,13 +313,20 @@ def runS2blayer(C1outputs, prots):
 # 	print 'S3 layer shape: ', len(output), output[0].shape
 # 	return output
 
-def scale_maxes(scales):
+def scale_maxes(scales, prio_map):
+	relative_focus = np.argmax(prio_map)
+	fy = math.floor(relative_focus/256)
+	fx = relative_focus % 256
+
 	final = [] # want to be 600 long
 	for scale in scales:
 		# scale.shape is n x n x 600
 		scale_set = [] # will end up being 600 x 1
+		sfx = int(fx * scale.shape[0]/256.0)
+		sfy = int(fy * scale.shape[1]/256.0)
 		for prot_idx in xrange(scale.shape[2]):
-			scale_set.append(np.amax(scale[:,:,prot_idx]))
+			# scale_set.append(np.amax(scale[:,:,prot_idx]))
+			scale_set.append(scale[sfy,sfx,prot_idx]) # order of x/y?
 		final.append(scale_set)
 	# final should currently be 3 x 600
 	return np.mean(final, axis=0) # 600-length, 1D
@@ -333,16 +340,18 @@ def avg_spearman(a, b):
 	return np.sum(lower)/value_count
 
 def comparison(a, b):
-	return stats.spearmanr(a, b)[0]
+	# return stats.spearmanr(a, b)[0]
 	# return spatial.distance.euclidean(a, b)
-	# return np.dot(a, b)
+	return np.dot(a, b)/np.linalg.norm(a)
 
-def runS3layer(S2boutputs, prots):
+def runS3layer(S2boutputs, prots, prio_map):
 	print 'Running S3 layer'
 	S2bsmall = S2boutputs[:3] # 3 x n x n x 600
 	final_output = [] # want to end up with 40 x 43
 	# S2bsmall is an array 3 of numpy arrays that are n x n x 600
-	maxes = scale_maxes(S2bsmall)
+	maxes = scale_maxes(S2bsmall, prio_map)
+	import matplotlib.pyplot as plt
+	plt.plot(np.arange(len(maxes)), maxes)
 	for prot_idx, thisprot in enumerate(prots):
 		# thisprot is 43 x 600
 		subprots = []
@@ -405,9 +414,9 @@ def feedbackSignal(objprots, targetIndx, imgC2b): #F(o,P), Eq 4
 	return feedback
 
 def scale(arr):
-    arr *= 1.0/np.amax(arr)
-    arr += 0.5
-    return arr
+	arr *= 1.0/np.amax(arr)
+	arr += 0.5
+	return arr
 
 def imgDynamicRange(inmap):
 	minVal = np.min(inmap)
@@ -424,7 +433,7 @@ def topdownModulation(S2boutputs,feedback): #LIP MAP
 	for scale in xrange(len(S2boutputs)):
 		S2bsum = np.sum(S2boutputs[scale], axis = 2)
 		S2bsum = S2bsum[:,:,np.newaxis]
-		lip = (S2boutputs[scale] * feedback)#/(S2bsum + opt.STRNORMLIP)
+		lip = (S2boutputs[scale] * feedback)/(S2bsum + opt.STRNORMLIP)
 		lipMap.append(lip)
 	return lipMap
 
@@ -633,11 +642,16 @@ def inhibitionOfReturn(prio):
 
 def prio_modulation(prio, s2boutputs):
 	# prio = (prio - np.min(prio))/np.max(prio)
-	for idx, scale in enumerate(s2boutputs):
+	copy = np.copy(s2boutputs)
+	ret = []
+	for idx, scale in enumerate(copy):
 		rs = sm.imresize(prio, scale.shape[:2])
+		new = np.copy(copy[idx])
 		for i in xrange(600):
-			s2boutputs[idx][:,:,i] *= rs
-	return s2boutputs
+			new[:,:,i] *= rs
+		# copy[idx].fill(1.0)
+		ret.append(new)
+	return ret
 
 def crop_s2boutputs(s2boutputs, prio):
 	relative_focus = np.argmax(prio)

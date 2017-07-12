@@ -24,7 +24,8 @@ print 'Loaded s1 filters'
 protsfile = open('imgprots.dat', 'rb')
 imgprots = cPickle.load(protsfile)#[beginning:beginning+change]
 print 'Loading objprots filters'
-protsfile = open('objprotsCorrect.dat', 'rb')
+# protsfile = open('objprotsCorrect.dat', 'rb')
+protsfile = open('resizedobjprots.dat', 'rb')
 objprots = cPickle.load(protsfile)
 for idx, _ in enumerate(objprots):
     objprots[idx] = objprots[idx]#[beginning:beginning+change]
@@ -60,8 +61,8 @@ lobster = 22
 accordion = 1
 turtle = 38
 
-targetIndex = spiral
-stimnum = 8
+targetIndex = statue
+stimnum = 4
 location = (0, 2) # ZERO INDEXED
 
 scaleSize = 8
@@ -82,24 +83,24 @@ def check_bounds(x, y):
 # img = scipy.misc.imread('example.png')
 img = scipy.misc.imread('stimuli/1.array{}.ot.png'.format(stimnum))
 S1outputs = Model1.runS1layer(img, s1filters)
-#sif, minV, maxV = Model1.imgDynamicRange(np.mean(S1outputs[scaleSize], axis = 2))
-#print 'Sif: ', sif.shape, 'Max: ', maxV, 'Min: ', minV
-
 C1outputs = Model1.runC1layer(S1outputs)
-#cif, minV, maxV = Model1.imgDynamicRange(np.mean(C1outputs[scaleSize], axis = 2))
-#print 'Cif: ', cif.shape, 'Max: ', maxV, 'Min: ', minV
-
 S2boutputs = Model1.runS2blayer(C1outputs, imgprots)
-#s2b, minV, maxV = Model1.imgDynamicRange(S2boutputs[scaleSize][:,:,protID])
-#print 's2b: ', s2b.shape, 'Max: ', maxV, 'Min: ', minV
-
-# C2boutputs = Model1.runC1layer(S2boutputs)
 feedback = Model1.feedbackSignal(objprots, targetIndex, imgC2b)
 print 'feedback info: ', feedback.shape
 lipmap = Model1.topdownModulation(S2boutputs,feedback)
 protID = np.argmax(feedback)
 print feedback[protID], np.mean(feedback)
 print 'lipmap shape: ', len(lipmap), lipmap[0].shape
+#sif, minV, maxV = Model1.imgDynamicRange(np.mean(S1outputs[scaleSize], axis = 2))
+#print 'Sif: ', sif.shape, 'Max: ', maxV, 'Min: ', minV
+
+#cif, minV, maxV = Model1.imgDynamicRange(np.mean(C1outputs[scaleSize], axis = 2))
+#print 'Cif: ', cif.shape, 'Max: ', maxV, 'Min: ', minV
+
+#s2b, minV, maxV = Model1.imgDynamicRange(S2boutputs[scaleSize][:,:,protID])
+#print 's2b: ', s2b.shape, 'Max: ', maxV, 'Min: ', minV
+
+# C2boutputs = Model1.runC1layer(S2boutputs)
 #lm, minV, maxV = Model1.imgDynamicRange(lipmap[scaleSize][:,:,protID])
 #print 'lipmap: ', lm.shape, 'Max: ', maxV, 'Min: ', minV
 
@@ -118,14 +119,15 @@ priorityMap = Model1.priorityMap(lipmap,[256,256])
 # for i in xrange(inhibitions):
 #     priorityMap = Model1.inhibitionOfReturn(priorityMap)
 
-
 modulated_s2boutputs = Model1.prio_modulation(priorityMap, S2boutputs)
 # cropped_s2boutputs = Model1.crop_s2boutputs(modulated_s2boutputs, priorityMap)
 cropped_s2boutputs = modulated_s2boutputs
-t = Model1.runS3layer(cropped_s2boutputs, s3prots)
+t = Model1.runS3layer(cropped_s2boutputs, s3prots, priorityMap)
 # print t
 t2 = Model1.runC3layer(t)
 print t2
+print stimnum, 'stimnum'
+print targetIndex
 
 # print t2
 # priorityMap = Model1.inhibitionOfReturn(priorityMap)
@@ -135,7 +137,7 @@ print 'Feedback signal shape: ', feedback.shape
 numCols = 5
 numRows = 12
 
-whichgraph = 'a'
+whichgraph = 'b'
 
 
 if 'a' in whichgraph:
@@ -189,8 +191,8 @@ if 'b' in whichgraph:
     for i in xrange(dims[0]):
         for j in xrange(dims[0]):
             tmp = pmap[i,j]
-            pmap[i,j]= np.exp(np.exp(tmp))
-            # pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
+            # pmap[i,j]= np.exp(np.exp(tmp))
+            pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
     plt.imshow(gaussian_filter(pmap, sigma=3))
 
 if 'c' in whichgraph:
@@ -219,16 +221,16 @@ if 'e' in whichgraph:
     fig,ax = plt.subplots(nrows = numRows, ncols = 2)
     plt.gray()  # show the filtered result in grayscale
     i = 0
-    for scale in cropped_s2boutputs:
-        #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-        s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
-        ax[i,0].imshow(s2b)
-        i += 1
-    i = 0
     for scale in modulated_s2boutputs:
         #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
         s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
-        ax[i,1].imshow(s2b)
+        ax[i,0].imshow(np.exp(np.exp(s2b)))
+        i += 1
+    i = 0
+    for scale in cropped_s2boutputs:
+        #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
+        s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
+        ax[i,1].imshow(np.exp(np.exp(s2b)))
         i += 1
 
 
