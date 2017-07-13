@@ -15,8 +15,8 @@ NBS3PROTS = 1720
 NBKEPTWEIGHTS = 100
 
 IMAGESFORPROTS = './naturalimages'
-IMAGESFOROBJPROTS = './objectimages'
-# IMAGESFOROBJPROTS = './gdrivesets/objs'
+# IMAGESFOROBJPROTS = './objectimages'
+IMAGESFOROBJPROTS = './gdrivesets/objs'
 
 GAUSSFACTOR = 150.0
 IORSIGMA = 35

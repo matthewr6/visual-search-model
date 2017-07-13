@@ -340,9 +340,9 @@ def avg_spearman(a, b):
 	return np.sum(lower)/value_count
 
 def comparison(a, b):
-	# return stats.spearmanr(a, b)[0]
+	return stats.spearmanr(a, b)[0]
 	# return spatial.distance.euclidean(a, b)
-	return np.dot(a, b)/np.linalg.norm(a)
+	# return np.dot(a, b)/np.linalg.norm(a)
 
 def runS3layer(S2boutputs, prots, prio_map):
 	print 'Running S3 layer'
@@ -483,7 +483,6 @@ def corresponding_points(ox, oy, stride, size):
 				points.append((x, y))
 			y += 1
 		x += 1
-
 	return points
 
 def priorityMap(lipMap,originalImgSize): #Eq 6 sum over scales
@@ -531,12 +530,14 @@ def buildImageProts(numProts, s1filters):
 		prots.append(extract3DPatch(C1outputs, nbkeptweights = opt.NBKEPTWEIGHTS))
 	return prots
 
-def buildObjProts(s1filters, imgProts, resize=False): #computing C2b
+def buildObjProts(s1filters, imgProts, resize=False, full=False): #computing C2b
 	print 'Building object protoypes' 
 	imgfiles = os.listdir(opt.IMAGESFOROBJPROTS) #changed IMAGESFOROBJPROTS to IMAGESFORPROTS
 	print imgfiles
 
 	prots = [0 for i in range(len(imgfiles)-1)]
+	if full:
+		prots = [0 for i in range(len(imgfiles))]
 	print 'Prots length: ', len(prots)
 	for n in range(len(imgfiles)):
 		print '----------------------------------------------------'
@@ -552,7 +553,7 @@ def buildObjProts(s1filters, imgProts, resize=False): #computing C2b
 		pnum = int(tmp[0]) - 1
 		print 'pnum: ', pnum		
 
-		img = sm.imread(opt.IMAGESFOROBJPROTS+'/'+imgfile) # changed IMAGESFOROBJPROTS to get 250 nat images c2b vals
+		img = sm.imread(opt.IMAGESFOROBJPROTS+'/'+imgfile, mode='I') # changed IMAGESFOROBJPROTS to get 250 nat images c2b vals
 		if resize:
 			img = sm.imresize(img, (64, 64))
 		

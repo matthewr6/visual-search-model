@@ -35,7 +35,8 @@ protsfile = open('naturalImgC2b.dat', 'rb')
 imgC2b = cPickle.load(protsfile)
 print 'imgC2b: ', len(imgC2b)
 imgC2b = imgC2b[0:-1]
-with open('S3prots.dat', 'rb') as f:
+# with open('S3prots.dat', 'rb') as f:
+with open('resizeds3prots.dat', 'rb') as f:
     s3prots = cPickle.load(f)[:-1]
 #num_objs x num_scales x n x n x prototypes
 
@@ -62,7 +63,7 @@ accordion = 1
 turtle = 38
 
 targetIndex = hat
-stimnum = 6
+stimnum = 4
 location = (0, 2) # ZERO INDEXED
 
 scaleSize = 8
@@ -81,7 +82,9 @@ def check_bounds(x, y):
     return x >= bounds[0] and x <= bounds[1] and y >= bounds[2] and y <= bounds[3]
 
 # img = scipy.misc.imread('example.png')
-img = scipy.misc.imread('stimuli/1.array{}.ot.png'.format(stimnum))
+img = scipy.misc.imread('hatonly.png', mode='I')
+# img = scipy.misc.imread('objectimages/1.normal.png')
+# img = scipy.misc.imread('stimuli/1.array{}.ot.png'.format(stimnum))
 S1outputs = Model1.runS1layer(img, s1filters)
 C1outputs = Model1.runC1layer(S1outputs)
 S2boutputs = Model1.runS2blayer(C1outputs, imgprots)
@@ -119,15 +122,15 @@ priorityMap = Model1.priorityMap(lipmap,[256,256])
 # for i in xrange(inhibitions):
 #     priorityMap = Model1.inhibitionOfReturn(priorityMap)
 
-# modulated_s2boutputs = Model1.prio_modulation(priorityMap, S2boutputs)
-# # cropped_s2boutputs = Model1.crop_s2boutputs(modulated_s2boutputs, priorityMap)
-# cropped_s2boutputs = modulated_s2boutputs
-# t = Model1.runS3layer(cropped_s2boutputs, s3prots, priorityMap)
-# # print t
-# t2 = Model1.runC3layer(t)
-# print t2
-# print stimnum, 'stimnum'
-# print targetIndex
+modulated_s2boutputs = Model1.prio_modulation(priorityMap, S2boutputs)
+# cropped_s2boutputs = Model1.crop_s2boutputs(modulated_s2boutputs, priorityMap)
+cropped_s2boutputs = modulated_s2boutputs
+t = Model1.runS3layer(cropped_s2boutputs, s3prots, priorityMap)
+# print t
+t2 = Model1.runC3layer(t)
+print 'predicted: ', t2
+print stimnum, 'stimnum'
+print 'is: ', targetIndex
 
 # print t2
 # priorityMap = Model1.inhibitionOfReturn(priorityMap)
@@ -224,19 +227,25 @@ if 'd' in whichgraph:
             ax[j,i].imshow(s2b)
 
 if 'e' in whichgraph:
-    fig,ax = plt.subplots(nrows = numRows, ncols = 2)
+    fig,ax = plt.subplots(nrows = numRows, ncols = 3)
     plt.gray()  # show the filtered result in grayscale
     i = 0
-    for scale in modulated_s2boutputs:
+    for scale in S2boutputs:
         #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
         s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
         ax[i,0].imshow(np.exp(np.exp(s2b)))
         i += 1
     i = 0
-    for scale in cropped_s2boutputs:
+    for scale in modulated_s2boutputs:
         #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
         s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
         ax[i,1].imshow(np.exp(np.exp(s2b)))
+        i += 1
+    i = 0
+    for scale in cropped_s2boutputs :
+        #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
+        s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
+        ax[i,2].imshow(np.exp(np.exp(s2b)))
         i += 1
 
 
