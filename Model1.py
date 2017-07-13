@@ -62,7 +62,7 @@ def runC1layer(S1outputs):
 			The scales are not merged UNLIKE HMAX.
 	"""
 	
-	print "Run C1 layer"
+	# print "Run C1 layer"
   
 	output = []
 	for k in range(0, len(S1outputs)):
@@ -77,7 +77,7 @@ def runC1layer(S1outputs):
 			out.append(result)
 		output.append(np.dstack(out[:]))
 
-	print 'C1 layer shape: ', len(output), output[0].shape
+	# print 'C1 layer shape: ', len(output), output[0].shape
 	return output
 	
 
@@ -86,9 +86,9 @@ def runS1layer(imgin, s1f):
 	Input: n x n img
 	Output: 4D arrays, 12 (one per scale) 4 (one per orientation) 2D maps 
 	'''
-	print "Running S1 layer"
+	# print "Running S1 layer"
 	img = imgin.astype(float)
-	print 'Input shape: ', img.shape
+	# print 'Input shape: ', img.shape
 	output=[]
 	imgsq = img**2
 	cpt=0
@@ -104,7 +104,7 @@ def runS1layer(imgin, s1f):
 		RFSIZE = fthisscale[0].shape[0]
 		assert RFSIZE == opt.S1RFSIZES[scaleidx]
 		stride = int(np.round(RFSIZE/4.0))
-		print 'Stride is: ', stride, ' and output shape is: ', img.shape[0]/stride
+		# print 'Stride is: ', stride, ' and output shape is: ', img.shape[0]/stride
 		outputsAllOrient = []
 		# The output of every S1 neuron is divided by the
 		# Euclidan norm (root-sum-squares) of its inputs; also, we take the
@@ -250,18 +250,18 @@ def myNormCrossCorr(stack, prot):
 
 
 def runS2blayer(C1outputs, prots):
-	print 'Running S2b layer' 
+	# print 'Running S2b layer' 
 	output=[]
 	# For each scale, extract the stack of input C layers of that scale...
 	for  scaleNum, Cthisscale in enumerate(C1outputs):
-		print '------------------------------'
-		print 'Working on scale: ', scaleNum
+		# print '------------------------------'
+		# print 'Working on scale: ', scaleNum
 	# If the C input maps are too small, as in, smaller than the S filter,
 	# then there's no point in computing the S output; we return a depth-column 
 	# of 0s instead
 	# Note that we're assuming all the prototypes to have the same siz
 		if prots[0].shape[0] >= Cthisscale.shape[0]:
-			print 'Cinput map too small!'
+			# print 'Cinput map too small!'
 			outputthisscale = [0] * len(prots)
 			output.append(np.dstack(outputthisscale[:]))
 			continue
@@ -274,7 +274,7 @@ def runS2blayer(C1outputs, prots):
 			outputthisscale.append(tmp)
 			assert np.max(tmp) < 1
 		output.append(np.dstack(outputthisscale[:]))
-	print 'S2b layer shape: ', len(output), output[0].shape
+	# print 'S2b layer shape: ', len(output), output[0].shape
 	return output
 
 # def runS3layer(S2boutputs, prots):
@@ -400,10 +400,10 @@ def feedbackSignal(objprots, targetIndx, imgC2b): #F(o,P), Eq 4
 	# 	c2b[obj_id] = np.max(np.asarray(max_acts),axis=0)
 
 	C2bavg = getC2bAverage(objprots)	#changed from objprots
-	print 'C2bavg shape', C2bavg.shape
-	print 'Target c2b shape', len(objprots), objprots[0].shape 
+	# print 'C2bavg shape', C2bavg.shape
+	# print 'Target c2b shape', len(objprots), objprots[0].shape
 	feedback = objprots[targetIndx]/C2bavg
-	print 'objprots[target].shape', objprots[targetIndx].shape
+	# print 'objprots[target].shape', objprots[targetIndx].shape
 #	feedback = ((feedback - np.min(feedback))/np.max(feedback))+1
 	feedback = feedback - np.min(feedback)
 	feedback = feedback / np.max(feedback)
@@ -622,12 +622,20 @@ def buildS3Prots(numprots, s1filters, imgProts, resize=False):
 
 def gauss_2d(focus_x, focus_y, sigma):
 	# inverTED vs inverSE?  inverTED may not be the same as inverSE
-	dims = [256, 256]
-	grid = np.empty(dims)
-	for i in xrange(dims[0]):
-		for j in xrange(dims[1]):
-			grid[i, j] = stats.norm.pdf(i, focus_y, sigma) * stats.norm.pdf(j, focus_x, sigma)
-	return grid
+	# dims = [256, 256]
+	# grid = np.empty(dims)
+	# for i in xrange(dims[0]):
+	# 	for j in xrange(dims[1]):
+	# 		grid[i, j] = stats.norm.pdf(i, focus_y, sigma) * stats.norm.pdf(j, focus_x, sigma)
+	# return grid
+	grid_y, grid_x = np.mgrid[:256, :256]
+    return stats.norm.pdf(grid_x, focus_x, sigma) * stats.norm.pdf(grid_y, focus_y, sigma)
+	
+def focus_location(prio):
+	relative_focus = np.argmax(prio)
+	y = math.floor(relative_focus/256)
+	x = relative_focus % 256
+	return (x, y)
 
 def inhibitionOfReturn(prio):
 	relative_focus = np.argmax(prio)
@@ -636,7 +644,9 @@ def inhibitionOfReturn(prio):
 	focus_x = relative_focus % 256
 	# k = 0.2 paper used this
 	# sigma = 16.667 paper used this
+	print 'before gauss'
 	g = (1.0 - opt.GAUSSFACTOR*gauss_2d(focus_x, focus_y, opt.IORSIGMA))
+	print 'after gauss'
 	# print g
 	# print prio
 	# print prio * g

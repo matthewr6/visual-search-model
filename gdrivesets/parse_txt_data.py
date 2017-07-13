@@ -1,4 +1,5 @@
 import sys
+import json
 
 # the 5s and 2s are 14 by 16... so give radius of 25?
 
@@ -13,7 +14,9 @@ nameformat = 'setsize{}_{}.png'
 final = {}
 for idx, row in enumerate(data):
     split = row.split(' ')
-    final[nameformat.format(split[3], split[1])] = (float(split[5]), float(split[6]))
+    final[nameformat.format(split[3], split[1])] = (float(split[6]), float(split[5]))
 
 # print final.keys()
-print final[nameformat.format(12, 1)]
+
+with open('jsondata/{}.json'.format(sys.argv[2]), 'wb') as f:
+    json.dump(final, f, indent=4)

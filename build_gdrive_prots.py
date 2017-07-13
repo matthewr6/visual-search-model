@@ -18,11 +18,12 @@ reload(Model1)
 # Build filters
 s1filters = Model1.buildS1filters()
 print 'Loaded s1 filters'
-with open('../imgprots.dat', 'rb') as pf:
+with open('imgprots.dat', 'rb') as pf:
     imgprots = cPickle.load(pf)
 
 objprots = Model1.buildObjProts(s1filters, imgprots, resize=True, full=True)
-with open('prots/objprots_25.dat', 'wb') as f:
+print objprots
+with open('gdrivesets/prots/objprots.dat', 'wb') as f:
     cPickle.dump(objprots, f, protocol=-1)
 
 # s3prots = Model1.buildS3Prots(2 * 43, s1filters, imgprots)
