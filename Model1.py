@@ -472,12 +472,11 @@ def corresponding_points(ox, oy, stride, size):
 	# z = 0, s = stride, w = int(np.round(stride/4.0))?
 	points = []
 	# w = int(np.round(stride/4.0))
-	w = 0
 	diff = int(np.round(stride * 0.75))
-	x = ox * (w + diff)
+	x = ox * diff
 	for i in range(stride):
 		# print x
-		y = oy * (w + diff)
+		y = oy * diff
 		for j in range(stride):
 			if x < size and y < size:
 				points.append((x, y))
@@ -506,6 +505,7 @@ def priorityMap(lipMap,originalImgSize): #Eq 6 sum over scales
 					priorityMap[x, y] += lip_S[i, j]
 					pointsUsed[x, y] += 1
 
+	# with np.errstate(divide='ignore', invalid='ignore'):
 	priorityMap = np.divide(priorityMap, pointsUsed)
 	return priorityMap
 

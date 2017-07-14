@@ -84,3 +84,13 @@ setsize12_28.png :: 10 :: False
 setsize12_79.png :: 8 :: True
 setsize12_27.png :: 10 :: False
 setsize12_81.png :: 7 :: True
+setsize12_73.png :: 1 :: True
+setsize12_19.png :: 10 :: False
+setsize12_87.png :: 5 :: True
+setsize12_60.png :: 10 :: False
+setsize12_95.png :: 4 :: True
+setsize12_65.png :: 10 :: True
+setsize12_1.png :: 3 :: True
+setsize12_88.png :: 10 :: False
+setsize12_67.png :: 10 :: False
+setsize12_17.png :: 4 :: True

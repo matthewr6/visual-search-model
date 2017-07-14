@@ -47,12 +47,16 @@ datatype = '5and2'
 with open('gdrivesets/jsondata/{}.json'.format(datatype), 'rb') as f:
     dataset = json.load(f)
 
-with open('gdrivesets/fixationdata/{}.txt'.format(datatype), 'rb') as f:
-    already_run = [a.split(' :: ')[0] for a in f.read().split('\n')]
+if os.path.isfile('gdrivesets/fixationdata/{}_final.txt'.format(datatype)):
+    with open('gdrivesets/fixationdata/{}_final.txt'.format(datatype), 'rb') as f:
+        already_run = [a.split(' :: ')[0] for a in f.read().split('\n')]
+else:
+    already_run = []
 
 fixations_allowed = 10
-with open('gdrivesets/fixationdata/{}.txt'.format(datatype), 'ab') as f:
+with open('gdrivesets/fixationdata/{}_final.txt'.format(datatype), 'ab') as f:
     for name, position in dataset.iteritems():
+
         filename = 'gdrivesets/scenes/{}/{}'.format(datatype, name)
         if not os.path.isfile(filename) or name in already_run:
             continue
@@ -79,119 +83,3 @@ with open('gdrivesets/fixationdata/{}.txt'.format(datatype), 'ab') as f:
             i += 1
         f.write('{} :: {} :: {}\n'.format(name, i, found))
         print '{} completed'.format(name)
-
-### vis stuff
-
-# numCols = 5
-# numRows = 12
-
-# whichgraph = 'b'
-
-
-# if 'a' in whichgraph:
-#     fig,ax = plt.subplots(nrows = numRows, ncols = numCols)
-#     plt.gray()  # show the filtered result in grayscale
-
-
-#     for i in xrange(numRows):
-#         ax[i,0].imshow(img)
-
-#     i = 0
-#     for scale in S1outputs:
-#         sif, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-#         ax[i,1].imshow(sif)
-#         i += 1
-
-#     i = 0
-#     for scale in C1outputs:
-#         cif, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-#         ax[i,2].imshow(cif)
-#         i += 1
-
-#     i = 0
-#     for scale in S2boutputs:
-#         #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-#         s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
-#         ax[i,3].imshow(s2b)
-#         i += 1
-
-#     i = 0
-#     for scale in lipmap:
-#         #lm, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-#         lm, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])  
-#         ax[i,4].imshow(lm)
-#         i += 1
-
-#     ax[0,0].set_title('Original')
-#     ax[0,1].set_title('S1')
-#     ax[0,2].set_title('C1')
-#     ax[0,3].set_title('S2b')
-#     ax[0,4].set_title('LIP')
-
-# if 'b' in whichgraph:
-
-#     fig,ax = plt.subplots(nrows = 1, ncols = 2)
-#     plt.gray()
-#     pmap, minV, maxV = Model1.imgDynamicRange(priorityMap)
-#     dims = pmap.shape
-#     pmap = Model1.scale(priorityMap)
-#     for i in xrange(dims[0]):
-#         for j in xrange(dims[0]):
-#             tmp = pmap[i,j]
-#             pmap[i,j]= np.exp(np.exp(tmp))
-#             # pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
-#     ax[0].imshow(gaussian_filter(pmap, sigma=3))
-
-#     for i in xrange(dims[0]):
-#         for j in xrange(dims[0]):
-#             tmp = pmap[i,j]
-#             pmap[i,j]= np.exp(tmp)
-#             # pmap[i,j]= np.exp(np.exp(np.exp(tmp)))
-#     ax[1].imshow(gaussian_filter(pmap, sigma=3))
-
-# if 'c' in whichgraph:
-
-#     fig,ax = plt.subplots(nrows = numRows, ncols = change)
-#     plt.gray()  # show the filtered result in grayscale
-
-#     for i in xrange(change):
-#         for j, scale in enumerate(S2boutputs):
-#             s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,i])
-#             ax[j,i].imshow(s2b)
-
-
-# if 'd' in whichgraph:
-
-#     fig,ax = plt.subplots(nrows = numRows, ncols = change)
-#     plt.gray()  # show the filtered result in grayscale
-#     plt.axis('off')
-
-#     for i in xrange(change):
-#         for j, scale in enumerate(lipmap):
-#             s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,i])
-#             ax[j,i].imshow(s2b)
-
-# if 'e' in whichgraph:
-#     fig,ax = plt.subplots(nrows = numRows, ncols = 3)
-#     plt.gray()  # show the filtered result in grayscale
-#     i = 0
-#     for scale in S2boutputs:
-#         #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-#         s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
-#         ax[i,0].imshow(np.exp(np.exp(s2b)))
-#         i += 1
-#     i = 0
-#     for scale in modulated_s2boutputs:
-#         #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-#         s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
-#         ax[i,1].imshow(np.exp(np.exp(s2b)))
-#         i += 1
-#     i = 0
-#     for scale in cropped_s2boutputs :
-#         #s2b, minV, maxV = Model1.imgDynamicRange(np.mean(scale, axis = 2))
-#         s2b, minV, maxV = Model1.imgDynamicRange(scale[:,:,protID])
-#         ax[i,2].imshow(np.exp(np.exp(s2b)))
-#         i += 1
-
-
-# plt.show()

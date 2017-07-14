@@ -24,8 +24,8 @@ print 'Loaded s1 filters'
 protsfile = open('imgprots.dat', 'rb')
 imgprots = cPickle.load(protsfile)#[beginning:beginning+change]
 print 'Loading objprots filters'
-# protsfile = open('objprotsCorrect.dat', 'rb')
-protsfile = open('resizedobjprots.dat', 'rb')
+protsfile = open('objprotsCorrect.dat', 'rb')
+# protsfile = open('resizedobjprots.dat', 'rb')
 objprots = cPickle.load(protsfile)
 for idx, _ in enumerate(objprots):
     objprots[idx] = objprots[idx]#[beginning:beginning+change]
@@ -35,8 +35,8 @@ protsfile = open('naturalImgC2b.dat', 'rb')
 imgC2b = cPickle.load(protsfile)
 print 'imgC2b: ', len(imgC2b)
 imgC2b = imgC2b[0:-1]
-# with open('S3prots.dat', 'rb') as f:
-with open('resizeds3prots.dat', 'rb') as f:
+with open('S3prots.dat', 'rb') as f:
+# with open('resizeds3prots.dat', 'rb') as f:
     s3prots = cPickle.load(f)[:-1]
 #num_objs x num_scales x n x n x prototypes
 
