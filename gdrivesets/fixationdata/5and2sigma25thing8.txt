@@ -1,0 +1,9 @@
+setsize12_69.png :: 4 :: True
+setsize12_32.png :: 3 :: True
+setsize12_57.png :: 1 :: True
+setsize12_100.png :: 10 :: False
+setsize12_24.png :: 3 :: True
+setsize12_4.png :: 10 :: False
+setsize12_42.png :: 10 :: True
+setsize12_9.png :: 10 :: False
+setsize12_13.png :: 9 :: True

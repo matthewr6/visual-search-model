@@ -629,7 +629,7 @@ def gauss_2d(focus_x, focus_y, sigma):
 	# 		grid[i, j] = stats.norm.pdf(i, focus_y, sigma) * stats.norm.pdf(j, focus_x, sigma)
 	# return grid
 	grid_y, grid_x = np.mgrid[:256, :256]
-    return stats.norm.pdf(grid_x, focus_x, sigma) * stats.norm.pdf(grid_y, focus_y, sigma)
+	return stats.norm.pdf(grid_x, focus_x, sigma) * stats.norm.pdf(grid_y, focus_y, sigma)
 	
 def focus_location(prio):
 	relative_focus = np.argmax(prio)
@@ -644,9 +644,9 @@ def inhibitionOfReturn(prio):
 	focus_x = relative_focus % 256
 	# k = 0.2 paper used this
 	# sigma = 16.667 paper used this
-	print 'before gauss'
+	# print 'before gauss'
 	g = (1.0 - opt.GAUSSFACTOR*gauss_2d(focus_x, focus_y, opt.IORSIGMA))
-	print 'after gauss'
+	# print 'after gauss'
 	# print g
 	# print prio
 	# print prio * g

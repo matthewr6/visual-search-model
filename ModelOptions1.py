@@ -22,3 +22,8 @@ IMAGESFOROBJPROTS = './gdrivesets/objs'
 # IORSIGMA = 35
 IORSIGMA = 15
 GAUSSFACTOR = 7.5
+
+# 15 and 7.5
+# try 25 for sigma?
+
+# default is better than sigma 10 I think

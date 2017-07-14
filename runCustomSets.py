@@ -16,6 +16,7 @@ import os
 reload(opt)
 reload(Model1)
 
+
 # Build filters
 s1filters = Model1.buildS1filters()
 protsfile = open('imgprots.dat', 'rb')
@@ -29,7 +30,7 @@ with open('gdrivesets/prots/objprots.dat', 'rb') as f: # correct file?
 # imgC2b = imgC2b[0:-1]
 
 # predicted x and y, real x and y
-box_radius = 12.0
+box_radius = (256/5.0)/2.0
 targetIndex = 0
 def check_bounds(px, py, rx, ry):
     bounds = [
@@ -38,6 +39,7 @@ def check_bounds(px, py, rx, ry):
         ry - box_radius,
         ry + box_radius
     ]
+    print px, py, bounds
     return px >= bounds[0] and px <= bounds[1] and py >= bounds[2] and py <= bounds[3]
 
 # img = scipy.misc.imread('gdrivesets/scenes/5and2/setsize{}_{}.png'.format(12, 36), mode='I')
@@ -45,10 +47,14 @@ datatype = '5and2'
 with open('gdrivesets/jsondata/{}.json'.format(datatype), 'rb') as f:
     dataset = json.load(f)
 
+with open('gdrivesets/fixationdata/{}.txt'.format(datatype), 'rb') as f:
+    already_run = [a.split(' :: ')[0] for a in f.read().split('\n')]
+
+fixations_allowed = 10
 with open('gdrivesets/fixationdata/{}.txt'.format(datatype), 'ab') as f:
     for name, position in dataset.iteritems():
         filename = 'gdrivesets/scenes/{}/{}'.format(datatype, name)
-        if not os.path.isfile(filename):
+        if not os.path.isfile(filename) or name in already_run:
             continue
         print '{} beginning'.format(name)
         img = scipy.misc.imread(filename, mode='I')
@@ -65,13 +71,13 @@ with open('gdrivesets/fixationdata/{}.txt'.format(datatype), 'ab') as f:
         print 'priority map created'
         i = 0
         found = False
-        while i < 5 and not found:
+        while i < fixations_allowed and not found:
             fx, fy = Model1.focus_location(priorityMap)
             found = check_bounds(fx, fy, position[0], position[1])
             if not found:
                 priorityMap, _, _ = Model1.inhibitionOfReturn(priorityMap)
             i += 1
-        f.write('{} :: {} :: {}'.format(name, i, found))
+        f.write('{} :: {} :: {}\n'.format(name, i, found))
         print '{} completed'.format(name)
 
 ### vis stuff
