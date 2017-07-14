@@ -53,7 +53,7 @@ if os.path.isfile('gdrivesets/fixationdata/{}_final.txt'.format(datatype)):
 else:
     already_run = []
 
-fixations_allowed = 10
+fixations_allowed = 20
 with open('gdrivesets/fixationdata/{}_final.txt'.format(datatype), 'ab') as f:
     for name, position in dataset.iteritems():
 
