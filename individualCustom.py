@@ -27,9 +27,10 @@ with open('gdrivesets/prots/objprots_smallerscales.dat', 'rb') as f: # correct f
     imgC2b = cPickle.load(f)
 
 # img = scipy.misc.imread('gdrivesets/scenes/5and2/setsize{}_{}.png'.format(12, 36), mode='I')
-datatype = '5and2'
-idx = 45
-name = 'setsize12_{}.png'.format(idx)
+datatype = 'blackandwhite'
+size = 3
+idx = 20
+name = 'setsize{}_{}.png'.format(size, idx)
 
 filename = 'gdrivesets/scenes/{}/{}'.format(datatype, name)
 print '{} beginning'.format(name)
@@ -42,6 +43,7 @@ print 'after s2b'
 targetIndex = 0
 feedback = Model1.feedbackSignal(objprots, targetIndex, imgC2b)
 lipmap = Model1.topdownModulation(S2boutputs,feedback)
+protID = np.argmax(feedback)
 with open('sample_unmodified_lip.dat', 'wb') as f:
     cPickle.dump(lipmap, f, protocol=-1)
 
@@ -50,7 +52,7 @@ with open('sample_unmodified_lip.dat', 'wb') as f:
 numCols = 5
 numRows = 12
 
-whichgraph = 'b'
+whichgraph = 'a'
 
 
 if 'a' in whichgraph:

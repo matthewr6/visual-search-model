@@ -27,7 +27,9 @@ priorityMap = Model1.priorityMap(lipmap,[256,256])
 inhibitions = 8
 displays = [priorityMap]
 for i in xrange(inhibitions):
-    displays.append(Model1.inhibitionOfReturn(displays[-1])[0])
+    n = Model1.inhibitionOfReturn(displays[-1])
+    print n[1:]
+    displays.append(n[0])
 
 fig,ax = plt.subplots(nrows = len(displays), ncols = 2)
 plt.gray()

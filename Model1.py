@@ -472,7 +472,7 @@ def corresponding_points(ox, oy, stride, size):
 	# z = 0, s = stride, w = int(np.round(stride/4.0))?
 	points = []
 	# w = int(np.round(stride/4.0))
-	diff = int(np.round(stride * 0.75))
+	diff = int(np.round(stride * 0.50001)) # 0.50001 or 0.75?
 	x = ox * diff
 	for i in range(stride):
 		# print x

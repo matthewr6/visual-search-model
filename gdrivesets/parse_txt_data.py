@@ -1,8 +1,9 @@
+import os
 import sys
 import json
 
 # the 5s and 2s are 14 by 16... so give radius of 25?
-
+basename = os.path.basename(sys.argv[1]).split('.')[0]
 with open(sys.argv[1], 'rb') as f:
     data = f.read().split('\n')[:-1]
 
@@ -18,5 +19,5 @@ for idx, row in enumerate(data):
 
 # print final.keys()
 
-with open('jsondata/{}.json'.format(sys.argv[2]), 'wb') as f:
+with open('scenejson/{}.json'.format(basename), 'wb') as f:
     json.dump(final, f, indent=4)
