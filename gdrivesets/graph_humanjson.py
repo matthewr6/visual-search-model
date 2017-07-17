@@ -1,6 +1,6 @@
 import os
 import sys
-import csv
+import json
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,17 +9,11 @@ import matplotlib.pyplot as plt
 basename = os.path.basename(sys.argv[1]).split('.')[0]
 data = []
 with open(sys.argv[1], 'rb') as f:
-    reader = csv.reader(f)
-    firstline = True
-    for row in reader:
-        if not firstline:
-            data.append((int(row[3]), int(row[7])))
-        firstline = False
+    data = json.load(f)
 
-sizes = [(3, (0, 0)), (6, (0, 1)), (12, (1, 0)), (18, (1, 1))]
+sizes = [('3', (0, 0)), ('6', (0, 1)), ('12', (1, 0)), ('18', (1, 1))]
 
-# filter only the setsize=12
-# data = [d[1] for d in data if d[0] == 3]
+# data = data['18']
 
 # data.sort()
 
@@ -29,7 +23,7 @@ def pseudocdf(arr):
 fig, ax = plt.subplots(nrows=2, ncols=2)
 
 for size, pos in sizes:
-    d = [d[1] for d in data if d[0] == size]
+    d = data[size]
     d.sort()
     ax[pos[0], pos[1]].plot(*zip(*pseudocdf(d)))
     ax[pos[0], pos[1]].title.set_text(size)

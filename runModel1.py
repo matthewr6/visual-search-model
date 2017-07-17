@@ -81,8 +81,8 @@ def check_bounds(x, y):
     print x, y, bounds
     return x >= bounds[0] and x <= bounds[1] and y >= bounds[2] and y <= bounds[3]
 
-# img = scipy.misc.imread('example.png')
-img = scipy.misc.imread('hatonly.png', mode='I')
+img = scipy.misc.imread('example.png')
+# img = scipy.misc.imread('hatonly.png', mode='I')
 # img = scipy.misc.imread('objectimages/1.normal.png')
 # img = scipy.misc.imread('stimuli/1.array{}.ot.png'.format(stimnum))
 S1outputs = Model1.runS1layer(img, s1filters)

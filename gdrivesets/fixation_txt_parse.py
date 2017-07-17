@@ -11,6 +11,9 @@ dict_data = {}
 # list_data = []
 for row in o_data:
     row = row.split(' :: ')
+    found = row[2] == 'True'
+    # if not found:
+    #     continue
     fixations = int(row[1])
     setsize = row[0].split('_')[0][7:]
     if setsize not in dict_data:

@@ -18,7 +18,7 @@ reload(Model1)
 
 # important stuff.  other important stuff can be found in ModelOptions1
 fixations_allowed = 20
-datatype = 'blackandwhite'
+datatype = 'conjunction'
 targetIndex = 3
 
 
