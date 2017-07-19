@@ -5,7 +5,6 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-# we care about setsize (3), rt (7)
 basename = os.path.basename(sys.argv[1]).split('.')[0]
 data = []
 with open(sys.argv[1], 'rb') as f:
@@ -13,12 +12,8 @@ with open(sys.argv[1], 'rb') as f:
 
 sizes = [('3', (0, 0)), ('6', (0, 1)), ('12', (1, 0)), ('18', (1, 1))]
 
-# data = data['18']
-
-# data.sort()
-
 def pseudocdf(arr):
-    ret = []
+    ret = [(0, 0)]
     for idx, v in enumerate(arr):
         if len(ret) and ret[-1][0] == v * 250.0:
             ret[-1] = (v*250.0, float(idx)/len(arr))
@@ -32,11 +27,14 @@ for size, pos in sizes:
     d = data[size]
     d.sort()
     ax[pos[0], pos[1]].plot(*zip(*pseudocdf(d)))
-    ax[pos[0], pos[1]].title.set_text(size)
+    ax[pos[0], pos[1]].title.set_text('Set size {}'.format(size))
+    ax[pos[0], pos[1]].set_xlim(left=0, right=5000)
+    ax[pos[0], pos[1]].set_ylim(bottom=0, top=1)
+    ax[pos[0], pos[1]].set_xlabel('Search Time (adjusted to ms)')
+    ax[pos[0], pos[1]].set_ylabel('Percent')
 
-# plt.plot(np.arange(len(data)), pseudocdf(data))
-# plt.plot(*zip(*pseudocdf(data)))
-# plt.xlabel('Milliseconds')
-# plt.ylabel('CDF')
+plt.suptitle('Model Fixation Time CDF')
+
+plt.subplots_adjust(hspace=0.5)
 
 plt.savefig('graphs/{}_model.png'.format(basename))

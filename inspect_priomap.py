@@ -24,7 +24,7 @@ with open('sample_unmodified_lip.dat', 'rb') as f:
 
 priorityMap = Model1.priorityMap(lipmap,[256,256])
 
-inhibitions = 8
+inhibitions = 1
 displays = [priorityMap]
 for i in xrange(inhibitions):
     n = Model1.inhibitionOfReturn(displays[-1])

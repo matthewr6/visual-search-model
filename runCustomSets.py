@@ -17,9 +17,13 @@ reload(opt)
 reload(Model1)
 
 # important stuff.  other important stuff can be found in ModelOptions1
-fixations_allowed = 20
-datatype = 'conjunction'
-targetIndex = 3
+# datatype = '5and2'
+datatype = sys.argv[1]
+if datatype not in ['5and2', 'blackandwhite', 'conjunction']:
+    raise Exception('Bad datatype')
+# datatype = 'blackandwhite'
+# datatype = 'conjunction'
+targetIndex = int(sys.argv[2])
 
 
 # Build filters
@@ -54,6 +58,7 @@ with open('gdrivesets/fixationdata/{}_final.txt'.format(datatype), 'ab') as f:
         if not os.path.isfile(filename) or name in already_run:
             continue
         print '{} beginning'.format(name)
+        fixations_allowed = int(name.split('_')[0][7:])
         img = scipy.misc.imread(filename, mode='I')
         S1outputs = Model1.runS1layer(img, s1filters)
         C1outputs = Model1.runC1layer(S1outputs)
