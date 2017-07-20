@@ -27,9 +27,9 @@ with open('gdrivesets/prots/objprots_smallerscales.dat', 'rb') as f: # correct f
     imgC2b = cPickle.load(f)
 
 # img = scipy.misc.imread('gdrivesets/scenes/5and2/setsize{}_{}.png'.format(12, 36), mode='I')
-datatype = 'blackandwhite'
+datatype = 'conjunction'
 size = 3
-idx = 20
+idx = 29
 name = 'setsize{}_{}.png'.format(size, idx)
 
 filename = 'gdrivesets/scenes/{}/{}'.format(datatype, name)
@@ -52,7 +52,7 @@ with open('sample_unmodified_lip.dat', 'wb') as f:
 numCols = 5
 numRows = 12
 
-whichgraph = 'a'
+whichgraph = ''
 
 
 if 'a' in whichgraph:
