@@ -93,6 +93,8 @@ print 'feedback info: ', feedback.shape
 lipmap = Model1.topdownModulation(S2boutputs,feedback)
 protID = np.argmax(feedback)
 print feedback[protID], np.mean(feedback)
+with open('sample_unmodified_lip.dat', 'wb') as f:
+    cPickle.dump(lipmap, f, protocol=-1)
 print 'lipmap shape: ', len(lipmap), lipmap[0].shape
 #sif, minV, maxV = Model1.imgDynamicRange(np.mean(S1outputs[scaleSize], axis = 2))
 #print 'Sif: ', sif.shape, 'Max: ', maxV, 'Min: ', minV

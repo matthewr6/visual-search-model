@@ -19,11 +19,17 @@ reload(Model1)
 # important stuff.  other important stuff can be found in ModelOptions1
 # datatype = '5and2'
 datatype = sys.argv[1]
-if datatype not in ['5and2', 'blackandwhite', 'conjunction']:
+targetidx = {
+    '5and2': 0,
+    '5and2_orientation': 0,
+    '5and2_popout': 0,
+    'blackandwhite': 3,
+    'conjunction': 3,
+    'popout': 5,
+}
+if datatype not in targetidx:
     raise Exception('Bad datatype')
-# datatype = 'blackandwhite'
-# datatype = 'conjunction'
-targetIndex = int(sys.argv[2])
+targetIndex = targetidx[datatype]
 
 
 # Build filters

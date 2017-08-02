@@ -54,13 +54,12 @@ for settype in scenes:
     with open('gdrivesets/scenejson/{}.json'.format(settype), 'rb') as f:
         dataset[settype] = json.load(f)
 
-plt.gray()
+# plt.gray()
 
 def save_priomap(prio, name, itr):
     pmap = np.exp(np.exp(np.exp(Model1.scale(prio))))
-    plt.imshow(gaussian_filter(pmap, sigma=3))
-    plt.savefig('gdrivesets/gifsrc/{}_{}.png'.format(name, itr))
-
+    # plt.imshow(gaussian_filter(pmap, sigma=3), cmap='hot')
+    plt.imsave('gdrivesets/gifsrc/{}_{}.png'.format(name, itr), gaussian_filter(pmap, sigma=3), format='png', cmap='hot')
 
 for scenetype in scenes:
     for scene in scenes[scenetype]['scenes']:

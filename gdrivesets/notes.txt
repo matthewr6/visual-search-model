@@ -1,8 +1,0 @@
-model fixations:
-    python graph_fixations.py fixationjson\5and2_final.json && python graph_fixations.py fixationjson\conjunction_final.json && python graph_fixations.py fixationjson\blackandwhite_final.json
-
-human fixations:
-    python graph_humanjson.py humandata\5and2.json && python graph_humanjson.py humandata\conjunction.json && python graph_humanjson.py humandata\blackandwhite.json
-
-comparison:
-    python graph_compare.py 5and2 && python graph_compare.py blackandwhite && python graph_compare.py conjunction

@@ -23,7 +23,7 @@ with open('imgprots.dat', 'rb') as pf:
 
 objprots = Model1.buildObjProts(s1filters, imgprots, resize=True, full=True)
 print objprots
-with open('gdrivesets/prots/objprots_smallerscales.dat', 'wb') as f:
+with open('gdrivesets/prots/objprots.dat', 'wb') as f:
     cPickle.dump(objprots, f, protocol=-1)
 
 # s3prots = Model1.buildS3Prots(2 * 43, s1filters, imgprots)
