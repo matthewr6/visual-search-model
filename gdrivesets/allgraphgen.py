@@ -27,7 +27,7 @@ modeltypes = ['5and2', '5and2_orientation', '5and2_popout', 'blackandwhite', 'po
 humantypes = ['5and2', 'blackandwhite']
 names = {
     '5and2': 'Spatial Configuration',
-    '5and2_orientation': 'Spatial Orientation',
+    '5and2_orientation': 'Scrambled Orientation',
     '5and2_popout': 'Orientation popout',
     'blackandwhite': 'Color popout',
     'popout': 'Shape popout'

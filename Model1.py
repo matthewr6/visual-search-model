@@ -78,6 +78,9 @@ def runC1layer(S1outputs):
 		output.append(np.dstack(out[:]))
 
 	# print 'C1 layer shape: ', len(output), output[0].shape
+	print 'shapes'
+	for idx, o in enumerate(output):
+		print '{},{}'.format(opt.S1RFSIZES[idx], o.shape[0])
 	return output
 	
 
